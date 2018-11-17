@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+
+}
+@using (Html.BeginForm("ShowResult", "Result", FormMethod.Post))
+{
+    <div class="parameters">
+        <div class="row">
+            <label class="col-md-3">Nereden :</label>
+            <select id="source" class="col-md-3">
+                @foreach (City item in ViewBag.cities)
+                {
+                    <option>@item.CityName</option>
+                }
+            </select>
+        </div>
+        <div class="row">
+            <label class="col-md-3">Nereye :</label>
+            <select id="destination" name="destination" class="col-md-3">
+                @foreach (City item in ViewBag.cities)
+                {
+                    <option>@item.CityName</option>
+                }
+            </select>
+        </div>
+        <br />
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-md-6">
+                <label>Bir yolcudan kaç tl alınırsa yüzde elli kar elde edilir ?</label>
+                <select id="firstQuestionPeopleCount">
+                    <option>10</option>
+                    <option>20</option>
+                    <option>30</option>
+                    <option>40</option>
+                    <option>50</option>
+                </select>
+                <br />
+                <button class="btn btn-success" type="button" onclick="firstQuestion()">Hesapla</button>
+                <br />
+                <label>Cevap :</label>
+                <br />
+                <label id="firstQuestionAnswer"></label>
+                <br />
+                <button class="btn btn-danger" style="visibility:hidden" id="firstQuestionMap" type="submit">Haritada Göster</button>
+            </div>
+            <div class="col-md-6">
+                <label>Sabit ücret ile kaç yolcu ile sefer düzenlenirse en çok karı yapabilirim </label>
+                @*<input type="text" id="secondQuestionPeopleCount"/>*@
+                <button class="btn btn-success" type="button" onclick="secondQuestion()">Hesapla</button>
+                <br />
+                <label>Cevap :</label>
+                <br />
+                <label id="secondQuestionAnswer"></label>
+                <button class="btn btn-danger" style="visibility:hidden" id="secondQuestionMap" onclick="secondQuestionMap()">Haritada Göster</button>
+            </div>
+        </div>
+        @*@Html.ActionLink("Hesapla", "About","Home",new { @class="btn btn-success" })*@
+        @*<button class="btn btn-success" type="submit">Hesapla</button>*@
+        @*kişi başı ücret 100 tl*@
+
+        <script>
+            function secondQuestion()
+            {
+                var source = $('#source').val();
+                var destination = $('#destination').val();
+                var peopleCount = $('#secondQuestionPeopleCount').val();
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/Home/StaticPrice?source=' + source + '&destination=' + destination,
+                    success: function (data) {
+                        var answerStr = 'Sabit ücretle ' + data.PeopleCount + ' yolcu ile en çok kar elde edilir';
+                        $('#secondQuestionAnswer').html('');
+                        $('#secondQuestionAnswer').html(answerStr);
+                        $('#secondQuestionMap').css('visibility', 'visible');
+                    }
+                });
+            }
+
+            function secondQuestionMap()
+            {
+                var destination = $('#destination').val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/Result/ShowResult?destination=' + destination ,
+                    success: function () {
+                        console.log('Başarılı');
+                    },
+                    error: function () {
+                        console.log('Hata');
+                    }
+                });
+            }
+
+            function firstQuestion()
+            {
+                var source = $('#source').val();
+                var destination = $('#destination').val();
+                var peopleCount = $('#firstQuestionPeopleCount').val();
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/Home/FiftyPercentProfit?source=' + source + '&destination=' + destination + '&peopleCount=' + peopleCount,
+                    success: function (data) {
+                        var answerStr = '%50 kar için bir yolcudan ' + data.PriceOfOnePerson + ' TL alınmalıdır';
+                        $('#firstQuestionAnswer').html('');
+                        $('#firstQuestionAnswer').html(answerStr);
+                        $('#firstQuestionMap').css('visibility','visible');
+                    },
+                    error:function()
+                    {
+                        console.log('Hata');
+                    }
+                });
+            }
+
+            function firstQuestionMap()
+            {
+                var destination = $('#destination').val();
+                $.ajax({
+                    type: 'GET',
+                    url: '/Result/ShowResult?destination=' + destination ,
+                    success: function () {
+                        console.log('Başarılı');
+                    },
+                    error: function () {
+                        console.log('Hata');
+                    }
+                });
+
+            }
+        </script>
+        <style>
+            .parameters{
+                margin-top:10%;
+            }
+        </style>
+
+    </div>
+
+ } 

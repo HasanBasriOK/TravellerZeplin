@@ -1,0 +1,154 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Custom Markers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+
+    <style>
+        #map {
+            height: 100%;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    @{
+        string mapLines = string.Empty;
+
+        //foreach (var item in (List<City>)ViewBag.SubCities)
+        //{
+
+        //}
+    }
+
+    <div id="map"></div>
+    <script>
+        var subCities = new Array();
+        var destination = "@ViewBag.Destination";
+        var i;
+
+        $(window).on("load", function () {
+            $("#map").css("position", "fixed !important");
+            $('#map').css("overflow", "visible");
+
+        });
+
+        var map;
+        function initMap() {
+            //$.ajax({
+            //    type: 'GET',
+            //    url: '/Result/First?destination=' + destination,
+            //    success: function (data) {
+            //        subCities = data;
+            //    }
+            //});
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 6,
+                center: new google.maps.LatLng(39.91987, 32.85427),
+                mapTypeId: 'roadmap'
+            });
+
+
+            var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+            var icons = {
+                parking: {
+                    icon: iconBase + 'parking_lot_maps.png'
+                },
+                library: {
+                    icon: iconBase + 'library_maps.png'
+                },
+                info: {
+                    icon: iconBase + 'info-i_maps.png'
+                }
+            };
+
+            var lineSymbol = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+            };
+
+            @{
+                List<City> cities = (List<City>)ViewBag.SubCities;
+                string writeText = "";
+
+                for (int i = 0; i < cities.Count; i++)
+                {
+                    string latitude1 = cities[i].Latitude.ToString();
+                    string longtitude1= cities[i].Longtitude.ToString();
+
+                    string latitude2 = cities[i+1].Latitude.ToString();
+                    string longtitude2 = cities[i + 1].Longtitude.ToString();
+
+
+                    writeText += @"new google.maps.Polyline({"
+                   +" path: [{ lat: "+latitude1+", lng: "+longtitude1+" }, { lat: "+latitude2+", lng: "+longtitude2+" }],"
+                   + "icons: [{"
+                    + " icon: lineSymbol,"
+                     + " offset: '100%'"
+                   + " }],"
+                 + "   map: map"
+             + "   });"
+;
+                }
+
+
+                MvcHtmlString htmlStr= MvcHtmlString.Create(writeText);
+
+            }
+
+            @htmlStr;
+
+            for (i = 0; i < subCities.length; i++) {
+                new google.maps.Polyline({
+                    path: [{ lat: subCities[i].Latitude, lng: subCities[i].Longtitude }, { lat: subCities[i + 1].Latitude, lng: subCities[i + 1].Longtitude }],
+                    icons: [{
+                        icon: lineSymbol,
+                        offset: '100%'
+                    }],
+                    map: map
+                });
+            }
+
+
+
+            //new google.maps.Polyline({
+            //    path: [{ lat: 37.0000, lng: 35.3213 }, { lat: 37.7648, lng: 38.2786 }],
+            //    icons: [{
+            //        icon: lineSymbol,
+            //        offset: '100%'
+            //    }],
+            //    map: map
+            //});
+
+            // Create markers.
+            features.forEach(function (feature) {
+                var marker = new google.maps.Marker({
+                    position: feature.position,
+                    icon: icons[feature.type].icon,
+                    map: map
+                });
+            });
+        }
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA50KuKQLKVAa70-B89dYdtrDOM8JsIDtA&callback=initMap">
+    </script>
+</body>
+</html>
